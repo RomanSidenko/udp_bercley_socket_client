@@ -10,7 +10,7 @@
 Socket::Socket() 
 {
 //#if defined  _WIN32
-	AbstractSocket* m_socket = new WinSocket;
+	m_socket = new WinSocket;
 //#else
 //	AbstractSocket*socket = new UnixSocket;
 //#endif
@@ -33,22 +33,13 @@ void Socket::disconnect()
 	m_socket->disconnect();
 }
 
-unsigned long Socket::readData(char* buf, unsigned long bufSize)
+unsigned long Socket::readData(char* buf, size_t bufferSize)
 {
-	return m_socket->readData(buf, bufSize);
+	return m_socket->readData(buf, bufferSize);
 }
 
-bool Socket::writeData(char * data, unsigned long dataSize)
+bool Socket::writeData(char * data, size_t bufferSize)
 {
-	return m_socket->writeData(data, dataSize);
+	return m_socket->writeData(data, bufferSize);
 }
 
-void Socket::setBufferSize(unsigned long bufSize)
-{
-	m_socket->setBufferSize(bufSize);
-}
-
-unsigned long Socket::getBuferSize()
-{
-	return m_socket->getBuferSize();
-}

@@ -11,16 +11,13 @@ public:
 
 	bool connectToHost(const std::string& hostName, const unsigned short hostPort) override;
 	void disconnect() override;
-	unsigned long readData(char* buf, unsigned long bufSize) override;
-	bool writeData(char* data, unsigned long dataSize) override;
+	unsigned long readData(char* buf, size_t bufferSize) override;
+	bool writeData(char* data, size_t bufferSize) override;
 
 private:
 	int init();
 	bool setNonBlockingMode();
-	bool openSocket() override;
-	bool bindingSocket(sockaddr_in& address) override;
-	
-	
+	bool openSocket(sockaddr_in& address) override;
 	
 };
 #endif // WINSOCKET_H

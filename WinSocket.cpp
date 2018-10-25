@@ -7,6 +7,7 @@
 
 #define DEFAULT_PORT 12345
 
+int ch = 0;
 WinSocket::WinSocket()
 {
 	sockaddr_in m_address;
@@ -14,7 +15,7 @@ WinSocket::WinSocket()
 	m_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	m_address.sin_port = htons(DEFAULT_PORT);
 
-	if (!openSocket())
+	if (!openSocket(m_address))
 		std::cout << "socket not open" << std::endl;
 	else
 		std::cout << "Descriptor " << getSocketDescriptor() << std::endl;
@@ -37,48 +38,47 @@ void WinSocket::disconnect()
 	WSACleanup();
 }
 
-bool WinSocket::bindingSocket(sockaddr_in& address)
+unsigned long WinSocket::readData(char* buf, size_t bufferSize)
 {
-	if (bind(m_descriptor, (const sockaddr*)& address, sizeof(sockaddr_in)) < 0)
-	{
-		return false;
-		///add error handling
-	}
-	return true;
-}
-
-unsigned long WinSocket::readData(char* buf, unsigned long bufSize)
-{
-	int received_bytes = -1;
-	unsigned int maximumPacketSize = sizeof(buf);
-
+	int receivedBytes = -1;
+	size_t maximumPacketSize = strlen(buf);
 	sockaddr_in from;
 	int fromLength = sizeof(from);
 
 	while (true)
 	{
-		
-		received_bytes = recvfrom(m_descriptor, buf, maximumPacketSize, 0, (sockaddr*)&from, &fromLength);
 
-		if (received_bytes <= 0)
+		receivedBytes = recvfrom(m_descriptor, buf, maximumPacketSize, 0, (sockaddr*)&from, &fromLength);
+
+		if (receivedBytes <= 0)
 			break;
 		else
-			std::cout << "packet" << buf;
+		{
+			std::cout << "size" << sizeof(buf) << std::endl;
+			break;
+		}
+
 	}
 	//unsigned int fromAddress = ntohl(from.sin_addr.s_addr);
 	//unsigned int fromPort = ntohs(from.sin_port);
-	return received_bytes;
+	return receivedBytes;
 }
 
-bool WinSocket::writeData(char* data, unsigned long dataSize)
+bool WinSocket::writeData(char* data, size_t bufferSize)
 {
-	int sent_bytes = sendto(m_descriptor, (const char*)data, dataSize, 0, (sockaddr*)& m_address, sizeof(sockaddr_in));
-	if (sent_bytes != dataSize)
+	sockaddr_in m_address;
+	m_address.sin_family = AF_INET;
+	m_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	m_address.sin_port = htons(DEFAULT_PORT);
+	int sent_bytes = sendto(m_descriptor, (const char*)data, bufferSize, 0, (sockaddr*)& m_address, sizeof(sockaddr_in));
+	if (sent_bytes != bufferSize)
 	{
+		std::cout << "failed to send packet" << WSAGetLastError()<< std::endl;
+		disconnect();
 		return false;
-		std::cout << "failed to send packet" << std::endl;
-		///add error handling
 	}
+	ch++;
+	std::cout << ch <<bufferSize<< std::endl;
 	return true;
 }
 
@@ -87,8 +87,8 @@ int WinSocket::init()
 	WSADATA wsaData;
 	if (FAILED(WSAStartup(MAKEWORD(2, 2), &wsaData)))
 	{
+		std::cout <<"Error in init(): " << WSAGetLastError()<<std::endl;
 		return false;
-		///add error handling
 	}
 	return true;
 }
@@ -98,20 +98,20 @@ bool WinSocket::setNonBlockingMode()
 	DWORD nonBlocking = 1;
 	if (ioctlsocket(m_descriptor, FIONBIO, &nonBlocking) != 0)
 	{
+		std::cout << "Error in setNonBlockingMode(): " << WSAGetLastError() << std::endl;
 		return false;
-		///add error handling
 	}
 	return true;
 }
 
-bool WinSocket::openSocket()
+bool WinSocket::openSocket(sockaddr_in& address)
 {
 	init();
 	m_descriptor = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if ((m_descriptor == INVALID_SOCKET) || (!bindingSocket(*m_address)) || (!setNonBlockingMode()))
+	if ((m_descriptor == INVALID_SOCKET) || (!setNonBlockingMode()))
 	{
+		std::cout << "Error in openSocket(): " << WSAGetLastError() << std::endl;
 		return false;
-		///add error handing open socket
 	}
 	return true;
 
