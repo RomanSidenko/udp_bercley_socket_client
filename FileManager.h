@@ -10,25 +10,40 @@ public:
 	FileManager();
 	~FileManager();
 
+	enum Commands
+	{
+		comSendFileName = 0,
+		comSendFileNameSize,
+		comSendFileSize,
+		comSendFile
+	};
+
 	std::string getFileName() const;
 	
-	bool readFile(const std::string& fileName);
+	bool readFile(std::string& fileName);
 	bool writeFile(char* buffer, std::string fileName);
-	std::streamsize getFileSize();
+	size_t getFileSize() const;
+	void setFileSize(size_t fileSize);
 	size_t getBufferSize() const;
+	void setFileNameSize(size_t fileNameSize);
+	size_t getFileNameSize() const;
+	void setFileName(char* fileName);
+	void setFileName(std::string& fileName);
 	char* getBuffer();
 	std::streampos getPos();
 	void closeStream();
+
 	
 
 private:
 	std::string m_fileName;
-	std::streamsize m_fileSize;
+	size_t m_fileSize;
 	size_t m_bufferSize;
+	size_t m_fileNameSize;
 	std::streampos m_pos;
 	std::ifstream m_in;
 	std::ofstream m_out;
-	void setFileName(const std::string& fileName);
+
 	void setBufferSize(size_t size);
 	
 };

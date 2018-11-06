@@ -23,18 +23,17 @@ std::string FileManager::getFileName() const
 	return m_fileName;
 }
 
-void FileManager::setFileName(const std::string& fileName)
-{
-	m_fileName = fileName;
-}
 
-bool FileManager::readFile(const std::string& fileName)
+bool FileManager::readFile(std::string& fileName)
 {
 	try
 	{
 		m_in.open(fileName.c_str(), std::ios::binary);
 		if (!m_in.is_open())
+		{
 			std::cout << "File is not open" << std::endl;
+			return false;
+		}
 		else
 		{
 			m_fileSize = m_in.seekg(0, std::ios::end).tellg();
@@ -45,7 +44,7 @@ bool FileManager::readFile(const std::string& fileName)
 	catch (const std::exception& error)
 	{
 		std::cerr << error.what() << std::endl;
-		return (EXIT_FAILURE);
+		return false;
 	}
 	
 	return true;
@@ -59,26 +58,33 @@ bool FileManager::writeFile(char* buffer, std::string fileName = std::string())
 	{
 		m_out.open(fileName, std::ios::binary);
 		if (!m_out.is_open())
+		{
 			std::cout << "File is not open" << std::endl;
+			return false;
+		}
+			
 		else
 		{
 			m_out.write(buffer, sizeof(buffer));
+			m_pos += sizeof(buffer);
 		}
 	}
 	else
-		m_out.write(buffer, sizeof(buffer));
-	if (sizeof(buffer) != m_out.seekp(0, std::ios::end).tellp())
 	{
-		m_out.close();
-		return false;
+		m_out.write(buffer, sizeof(buffer));
+		m_pos += sizeof(buffer);
 	}
 	return true;
 }
 
-
-std::streamsize FileManager::getFileSize()
+size_t FileManager::getFileSize() const
 {
 	return m_fileSize;
+}
+
+void FileManager::setFileSize(size_t fileSize)
+{
+	m_fileSize = fileSize;
 }
 
 size_t FileManager::getBufferSize() const
@@ -86,6 +92,25 @@ size_t FileManager::getBufferSize() const
 	return m_bufferSize;
 }
 
+void FileManager::setFileNameSize(size_t fileNameSize)
+{
+	m_fileNameSize = fileNameSize;
+}
+
+size_t FileManager::getFileNameSize() const
+{
+	return m_fileNameSize;
+}
+
+void FileManager::setFileName(char * fileName)
+{
+	m_fileName = fileName;
+}
+
+void FileManager::setFileName(std::string & fileName)
+{
+	m_fileName = fileName;
+}
 
 void FileManager::setBufferSize(size_t size)
 {
@@ -98,7 +123,7 @@ char* FileManager::getBuffer()
 	memset(&buffer, 0, sizeof(buffer));
 	m_in.read(buffer, sizeof(buffer));
 	if (m_in.eof())
-		setBufferSize(std::abs(m_pos - m_fileSize));
+		setBufferSize(std::abs(m_pos - static_cast<std::streamsize>(m_fileSize)));
 	else
 	{
 		m_pos = m_in.tellg();

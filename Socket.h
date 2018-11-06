@@ -16,6 +16,8 @@ public:
 	
 	unsigned long readData(char* buf, size_t bufferSize);
 	bool writeData(char* data, size_t bufferSize);
+	bool sendCommand(uint8_t command);
+	int reciveCommand(char* commandBuffer);
 
 private:
 	AbstractSocket* m_socket;

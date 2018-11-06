@@ -5,6 +5,12 @@
 class sockaddr_in;
 class AbstractSocket
 {
+	enum Commands
+	{
+		comSendTitle = 0,
+		comSendSize,
+		comSendFile		
+	};
 public:
 	AbstractSocket();
 	virtual ~AbstractSocket();
@@ -13,9 +19,8 @@ public:
 	virtual void disconnect() = 0;
 	virtual unsigned long readData(char* buf, size_t bufferSize) = 0;
 	virtual bool writeData(char* data, size_t bufferSize) = 0;
-	
-
-
+	virtual bool sendCommand(uint8_t command) = 0;
+	virtual int reciveCommand(char* commandBuffer) = 0;
 
 protected:
 	int m_descriptor;
