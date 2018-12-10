@@ -39,6 +39,7 @@ bool FileManager::readFile(std::string& fileName)
 			m_fileSize = m_in.seekg(0, std::ios::end).tellg();
 			m_in.seekg(0, std::ios::beg);
 			setFileName(fileName);
+			setFileNameSize(strlen(fileName.c_str()));
 		}
 	}
 	catch (const std::exception& error)
@@ -89,6 +90,8 @@ void FileManager::setFileSize(size_t fileSize)
 
 size_t FileManager::getBufferSize() const
 {
+	if (m_bufferSize == 0)
+		return 1024;
 	return m_bufferSize;
 }
 

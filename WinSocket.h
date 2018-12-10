@@ -20,6 +20,7 @@ private:
 	int init();
 	bool setNonBlockingMode();
 	bool openSocket(sockaddr_in& address) override;
+	int m_counter;
 	
 };
 #endif // WINSOCKET_H

@@ -11,6 +11,7 @@
 
 WinSocket::WinSocket()
 {
+	m_counter = 0;
 	sockaddr_in m_address;
 	m_address.sin_family = AF_INET;
 	m_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -58,7 +59,13 @@ unsigned long WinSocket::readData(char* buf, size_t bufferSize)
 
 bool WinSocket::writeData(char* data, size_t bufferSize)
 {
+	sockaddr_in m_address;
+	m_address.sin_family = AF_INET;
+	m_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	m_address.sin_port = htons(DEFAULT_PORT);
+
 	int sent_bytes = sendto(m_descriptor, data, static_cast<int>(bufferSize), 0, (sockaddr*)& m_address, sizeof(sockaddr_in));
+	std::cout << "Packet" << m_counter++ <<"size packet"<<sent_bytes<<std::endl;
 	if (sent_bytes != bufferSize)
 	{
 		return false;
@@ -92,7 +99,7 @@ int WinSocket::reciveCommand(char* commandBuffer)
 	sockaddr_in from;
 	int fromLength = static_cast<int>(sizeof(from));
 
-	receivedBytes = recvfrom(m_descriptor, commandBuffer, strlen(commandBuffer) /*its size is 8 bytes sizeof(int8_t)*/, 0, (sockaddr*)&from, &fromLength);
+	receivedBytes = recvfrom(m_descriptor, commandBuffer, static_cast<int>(strlen(commandBuffer)) /*its size is 8 bytes sizeof(int8_t)*/, 0, (sockaddr*)&from, &fromLength);
 	return receivedBytes;
 }
 
